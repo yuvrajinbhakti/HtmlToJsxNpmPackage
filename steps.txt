@@ -1,0 +1,21 @@
+create folder with same name as of package 
+npm init -y
+create index.js file or if we want to create any file like app.js(then write your code in app.js and also export it ),  then go to package.json then change "main":"index.js" to "main":"app.js"
+then run this command -> npm login then npm publish
+
+
+
+
+Before publishing, you can test it locally by using npm link:
+In your package folder:
+npm link
+In another project where you want to test it:
+npm link my-npm-package
+Now, you can require your package in that project:
+const greet = require('my-npm-package');
+console.log(greet('Yuvraj')); // Output: Hello, Yuvraj!
+
+
+
+Once published, your package will be available on npm for anyone to install using:
+npm install my-npm-package
