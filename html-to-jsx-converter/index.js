@@ -1,4 +1,4 @@
 import htmlToJsx from "./htmlToJsx";
-module.exports={
-    htmlToJsx,
-}
+module.exports = {
+  htmlToJsx,
+};

@@ -1,4 +1,4 @@
-const htmlparser2 = require('htmlparser2');
+import { DomHandler, Parser } from "htmlparser2";
 
 /**
  * Escape special characters for JSX.
@@ -7,10 +7,10 @@ const htmlparser2 = require('htmlparser2');
  */
 function escapeJsx(text) {
   return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 /**
@@ -19,19 +19,25 @@ function escapeJsx(text) {
  * @returns {string} - JSX attributes string.
  */
 function convertAttributes(attribs) {
-  return Object.entries(attribs || {}).map(([key, value]) => {
-    switch (key) {
-      case "class":
-        key = "className";
-        break;
-      case "for":
-        key = "htmlFor";
-        break;
-      default:
-        break;
-    }
-    return value !== undefined ? `${key}="${escapeJsx(value)}"` : '';
-  }).filter(Boolean).join(" ");
+  const attributesString = Object.entries(attribs || {})
+    .map(([key, value]) => {
+      switch (key) {
+        case "class":
+          key = "className";
+          break;
+        case "for":
+          key = "htmlFor";
+          break;
+        default:
+          break;
+      }
+      return value !== undefined ? `${key}="${escapeJsx(value)}"` : "";
+    })
+    .filter(Boolean)
+    .join(" ");
+
+  // Return attributes properly formatted, no leading space if empty
+  return attributesString.length > 0 ? ` ${attributesString}` : "";
 }
 
 /**
@@ -40,9 +46,9 @@ function convertAttributes(attribs) {
  * @returns {string} - JSX string.
  */
 function htmlToJsx(html) {
-  const handler = new htmlparser2.DomHandler();
-  const parser = new htmlparser2.Parser(handler, { lowerCaseAttributeNames: false });
-  
+  const handler = new DomHandler();
+  const parser = new Parser(handler, { lowerCaseAttributeNames: false });
+
   parser.write(html);
   parser.end();
 
@@ -52,17 +58,23 @@ function htmlToJsx(html) {
     }
 
     const attributes = convertAttributes(node.attribs);
-    const children = node.children ? node.children.map(traverseDom).filter(Boolean).join("") : "";
+    const children = node.children
+      ? node.children.map(traverseDom).filter(Boolean).join("")
+      : "";
 
-    // Handle self-closing tags
-    if (node.children.length === 0 && !['br', 'img', 'input', 'hr', 'meta', 'link'].includes(node.name)) {
-      return `<${node.name} ${attributes} />`;
+    // Handle self-closing tags properly
+    if (
+      node.children.length === 0 &&
+      ["br", "img", "input", "hr", "meta", "link"].includes(node.name)
+    ) {
+      return `<${node.name}${attributes} />`;
     }
 
-    return `<${node.name} ${attributes}>${children}</${node.name}>`;
+    // Properly handle non-self-closing tags
+    return `<${node.name}${attributes}>${children}</${node.name}>`;
   };
 
   return handler.dom.map(traverseDom).join("");
 }
 
-module.exports = htmlToJsx;
+export default htmlToJsx;
